@@ -5,7 +5,6 @@ import cv2
 from openvino.inference_engine import IENetwork, IEPlugin, IECore
 from src.Queue import Queue
 from src.RequestId import RequestId
-# from src.Visualizer import SegmentationVisualizer, DetectionVisualizer
 
 
 class IENetMeta(object):
@@ -24,12 +23,6 @@ class IENetMeta(object):
         self.start_current_infer_times_queue = Queue(requests_num)
 
         self.outputs_buffer = None
-
-    # def init_visualizer(self, path_to_visualizer_cfg, net_type, confidence_thresh=0.5):
-    #     if net_type.lower() == "segmentation":
-    #         self.visualizer = SegmentationVisualizer(path_to_visualizer_cfg, confidence_thresh)
-    #     else:
-    #         self.visualizer = DetectionVisualizer(path_to_visualizer_cfg, confidence_thresh)
 
     def init_outputs_buffer(self, buffer_size):
         self.outputs_buffer = Queue(buffer_size)
@@ -72,9 +65,6 @@ class IENetMeta(object):
         blob = cv2.dnn.blobFromImages([frame], 1, dst_shape, swapRB=self.swapRB)
         return blob
 
-    def visualize(self, frame, net_output):
-        frame = self.visualizer.visualize(frame, net_output)
-        return frame
 
 class IENetCPU(IENetMeta):
     def __init__(self, path_to_model_xml, path_to_model_bin, requests_num):

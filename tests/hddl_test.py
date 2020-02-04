@@ -1,11 +1,13 @@
-import subprocess
+import sys
+from subprocess import *
 
-command = ('echo "this echo command' +
-' has subquotes, spaces,\n\n" && echo "and newlines!"')
+command = 'sh /home/user/PycharmProjects/benchmark/tests/test_script.sh'
 
-p = subprocess.Popen(command, universal_newlines=True,
-                     shell=True, stdout=subprocess.PIPE,
-                     stderr=subprocess.PIPE)
-text = p.stdout.read()
-retcode = p.wait()
-print(text)
+proc = Popen(command, shell=True, stdout=PIPE)
+while True:
+    data = proc.stdout.readline()   # Alternatively proc.stdout.read(1024)
+    if len(data):
+        print(data)
+    if len(data) == 0:
+        break
+    # sys.stdout.write(data)   # sys.stdout.buffer.write(data) on Python 3.x
