@@ -1,73 +1,65 @@
+# from statistics import median
+import os
 import cv2
-import yaml
-from os import path as osp
-from src.config_tools import parse_devices
-from src.IENet import IENetCPU, IENetHDDL
-from src.vusualize_utils import prepare_net_output, visualize
+import getpass
+from openvino.inference_engine import IENetwork, IEPlugin
 
+user_name = getpass.getuser()
+cpu_extention_dir = "/home/{}/inference_engine_samples_build/intel64/Release/lib/".format(user_name)
+cpu_extention_filename = "libcpu_extension.so"
+path_to_cpu_extention = os.path.join(cpu_extention_dir, cpu_extention_filename)
 
-path_to_benchmark_config = "benchmark.cfg"
-with open(path_to_benchmark_config, "r") as stream:
-    config = yaml.safe_load(stream)
+device = "CPU"
+request_num = 32
 
-net_xml = config["model_xml_name"]
-net_bin = config["model_bin_name"]
-net_xml_path = osp.join("model", net_xml)
-net_bin_path = osp.join("model", net_bin)
+plugin = IEPlugin(device)
+if device == "CPU":
+    config = {"CPU_THREADS_NUM": "0", "CPU_THROUGHPUT_STREAMS": str(request_num)}
+    plugin.add_cpu_extension(path_to_cpu_extention)
+elif device == "HDDL":
+    config = {"LOG_LEVEL": "LOG_INFO",
+              "VPU_LOG_LEVEL": "LOG_INFO"}
+else:
+    config = {}
 
-nets = []
-devices = parse_devices(config["devices"])
+plugin.set_config(config)
 
-for device in devices:
-    if device == "CPU":
-        requests_num = config["cpu_request_num"]
-        net = IENetCPU(net_xml_path, net_bin_path, requests_num)
-    elif device == "HDDL":
-        requests_num = config["hddl_request_num"]
-        net = IENetHDDL(net_xml_path, net_bin_path, requests_num)
-    else:
-        raise ValueError("device should be CPU or HDDL")
-    nets.append(net)
+xml_file = "model/road-segmentation-adas-0001.xml"
+bin_file = "model/road-segmentation-adas-0001.bin"
 
-for device in devices:
-    if device == "CPU":
-        requests_num = config["cpu_request_num"]
-        net = IENetCPU(net_xml_path, net_bin_path, requests_num)
-    elif device == "HDDL":
-        requests_num = config["hddl_request_num"]
-        net = IENetHDDL(net_xml_path, net_bin_path, requests_num)
-    else:
-        raise ValueError("device should be CPU or HDDL")
-    net.init_input_blob_params()
-    nets.append(net)
+ie_network = IENetwork(xml_file, bin_file)
 
-img = cv2.imread("images/road.jpeg")
+input_info = ie_network.inputs
+exe_network = plugin.load(ie_network, request_num)
 
-for net in nets:
-    for r in range(net.requests_num):
-        currnet_req = net.current_request_id
-        net.start_single_infer(img)
-        net.update_current_request_id()
+image = cv2.imread("images/road.jpeg")
+_, _, input_h, input_w = input_info["data"].shape
+dst_shape = (input_w, input_h)
+input_images = cv2.dnn.blobFromImages([image], 1, dst_shape, swapRB=True)
+input_images_dict = {"data": input_images}
 
-RUN = True
+infer_requests = exe_network.requests
+current_inference = 0
+previous_inference = 1 - request_num
 
-while RUN:
-    for net in nets:
-        current_request_id = net.get_current_request_id()
-        if net.request_is_done(current_request_id):
-            request_result = net.get_request_result(current_request_id)
-            img_to_show = img.copy()
-            h, w, _ = img_to_show.shape
-            img_to_show = cv2.resize(img_to_show, (w//2, h//2))
-            img_to_show = visualize(img_to_show, request_result)
+infer_requests[0].async_infer(input_images_dict)
+infer_requests[0].wait()
 
-            cv2.imshow("result", img_to_show)
-            if cv2.waitKey(1) & 0xFF == 27:
-                cv2.destroyAllWindows()
-                RUN = False
-                break
+while True:
+    exe_network.start_async(current_inference, input_images_dict)
+    if previous_inference >= 0:
+        status = infer_requests[previous_inference].wait()
 
-            net.start_single_infer(img)
-            net.update_current_request_id()
-#
-#
+    current_inference += 1
+    if current_inference >= request_num:
+        current_inference = 0
+        # required_inference_requests_were_executed = True
+
+    previous_inference += 1
+    if previous_inference >= request_num:
+        previous_inference = 0
+    # step += 1
+
+# for not_completed_index in range(request_num):
+#     if infer_requests[not_completed_index].wait(0) != 0:
+#         infer_requests[not_completed_index].wait()
