@@ -11,8 +11,11 @@ class InferExecutorThread(Thread):
         self.input_data = input_data
 
     def run(self):
+        counter = 0
         while True:
-            self.executor.update(self.input_data)
+            print(self.name + " {}".format(counter))
+            counter += 1
+            self.executor.update()
 
 
 # def create_threads():

@@ -33,9 +33,11 @@ class IENetMeta(object):
     def init_exec_net(self):
         pass
 
-    def start_single_infer(self, frame):
+    def start_single_infer(self, frame, request=None):
+        if isinstance(request, type(None)):
+            request = self.current_request_id.id
         input_blob = self.frame_to_blob(frame)
-        self.make_request(self.current_request_id.id, input_blob)
+        self.make_request(request, input_blob)
         self.requests_queue.push(self.current_request_id.id)
         self.start_current_infer_times_queue.push(time())
 

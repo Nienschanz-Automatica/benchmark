@@ -4,15 +4,14 @@ from threading import Thread
 
 
 class InferExecutorThread(Thread):
-    def __init__(self, device, infer_executor, input_data):
+    def __init__(self, device, infer_executor):
         Thread.__init__(self)
         self.name = device
         self.executor = infer_executor
-        self.input_data = input_data
 
     def run(self):
         while True:
-            self.executor.update(self.input_data)
+            self.executor.update()
 
 
 # def create_threads():

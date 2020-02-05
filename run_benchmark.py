@@ -9,8 +9,8 @@ cpu_extention_dir = "/home/{}/inference_engine_samples_build/intel64/Release/lib
 cpu_extention_filename = "libcpu_extension.so"
 path_to_cpu_extention = os.path.join(cpu_extention_dir, cpu_extention_filename)
 
-devices = ["CPU"]
-request_num = 32
+devices = ["HDDL"]
+request_num = 128
 
 # plugin = IEPlugin(device)
 # if device == "CPU":
@@ -54,8 +54,9 @@ def build_nets(xml_file, bin_file, devices, requests_num):
             config = {"CPU_THREADS_NUM": "0", "CPU_THROUGHPUT_STREAMS": str(request_num)}
             plugin.add_cpu_extension(path_to_cpu_extention)
         elif device == "HDDL":
-            config = {"LOG_LEVEL": "LOG_INFO",
-                      "VPU_LOG_LEVEL": "LOG_INFO"}
+            # config = {"LOG_LEVEL": "LOG_INFO",
+            #           "VPU_LOG_LEVEL": "LOG_INFO"}
+            config = {}
         else:
             config = {}
 

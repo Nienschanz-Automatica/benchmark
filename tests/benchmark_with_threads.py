@@ -10,30 +10,31 @@ cpu_extention_dir = "/home/{}/inference_engine_samples_build/intel64/Release/lib
 cpu_extention_filename = "libcpu_extension.so"
 path_to_cpu_extention = os.path.join(cpu_extention_dir, cpu_extention_filename)
 
-devices = ["CPU"]
+devices = ["HDDL", "CPU"]
 request_num = 32
 
 xml_file = "model/road-segmentation-adas-0001.xml"
 bin_file = "model/road-segmentation-adas-0001.bin"
 
 class InferExecutor():
-    def __init__(self, exec_net):
+    def __init__(self, exec_net, input_images_dict):
         self.exec_net = exec_net
         self.infer_requests = self.exec_net.requests
         self.current_inference = 0
-        self.previous_inference = 1 - len(self.infer_requests)
+        self.input_images_dict = input_images_dict
+        for i in range(len(self.infer_requests)):
+            self.exec_net.start_async(self.current_inference, input_images_dict)
+            self.current_inference += 1
+            if self.current_inference >= len(self.infer_requests):
+                self.current_inference = 0
 
-    def update(self, input_images_dict):
-        self.exec_net.start_async(self.current_inference, input_images_dict)
-        if self.previous_inference >= 0:
-            status = self.infer_requests[self.previous_inference].wait(-1)
+    def update(self):
+        if self.infer_requests[self.current_inference].wait(0.1) == 0:
+            self.exec_net.start_async(self.current_inference, self.input_images_dict)
         self.current_inference += 1
         if self.current_inference >= len(self.infer_requests):
             self.current_inference = 0
 
-        self.previous_inference += 1
-        if self.previous_inference >= len(self.infer_requests):
-            self.previous_inference = 0
 
 def build_nets(xml_file, bin_file, devices, requests_num):
     threads_list = []
@@ -56,7 +57,7 @@ def build_nets(xml_file, bin_file, devices, requests_num):
         plugin.set_config(config)
         ie_network = IENetwork(xml_file, bin_file)
         exe_network = plugin.load(ie_network, requests_num)
-        infer_executor = InferExecutor(exe_network)
+        infer_executor = InferExecutor(exe_network, input_images_dict)
         executor_thread = InferExecutorThread(device, infer_executor, input_images_dict)
         threads_list.append(executor_thread)
     return threads_list
