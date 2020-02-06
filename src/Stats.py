@@ -32,9 +32,9 @@ class CpuStatsListener():
             util = np.array(device.util)
             temperature = np.array(device.temperature)
             new_df = pd.DataFrame({"name":name,
-                               "time": time,
-                               "utilisation": util,
-                               "temperature": temperature})
+                                   "time": time,
+                                   "utilisation": util,
+                                   "temperature": temperature}, index=["name"])
             df = df.append(new_df)
         return df
 
@@ -42,15 +42,15 @@ class CpuStatsListener():
         self.update_cpu_usage()
         self.update_cpu_temperature()
         self.update_time(update_time)
-        if len(self.devices[0].util) > 0:
+        if len(self.devices[0].util) > 10:
             statistic = self.get_statistic()
             if not self.saved:
-                statistic.to_excel(self.log_file_name)
+                statistic.to_excel(self.log_file_name, index=False)
                 self.saved = True
             else:
                 old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
                 full_statistic = old_statistic.append(statistic)
-                full_statistic.to_excel(self.log_file_name)
+                full_statistic.to_excel(self.log_file_name, index=False)
             self.clear_devices_data()
 
     def update_time(self, update_time):

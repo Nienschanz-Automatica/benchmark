@@ -15,7 +15,7 @@ current_logs_dir = os.path.join("logs", now)
 os.mkdir(current_logs_dir)
 for device in devices:
     os.mkdir(os.path.join(current_logs_dir, device))
-    os.mkdir(os.path.join(current_logs_dir, "RAM"))
+os.mkdir(os.path.join(current_logs_dir, "RAM"))
 
 
 
