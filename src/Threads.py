@@ -19,9 +19,13 @@ class ListenersThreads(Thread):
         Thread.__init__(self)
         self.listeners = listeners_list
         self.hddl_listener = None
+        print(len(self.listeners))
         for idx, listener in enumerate(self.listeners):
             if isinstance(listener, HDDLStatsListener):
+                print("HDDL")
                 self.hddl_listener = self.listeners.pop(idx)
+        print(len(self.listeners))
+        sleep(5)
 
     def run(self):
         while True:
@@ -31,13 +35,17 @@ class ListenersThreads(Thread):
         now = datetime.now()
         now = now.strftime("%H:%M:%S")
         if self.hddl_listener is not None:
+            print("test1")
+            sleep(5)
             ret = self.hddl_listener.update(now)
+            print(ret)
             if ret:
                 self.hddl_listener.info()
                 for listener in self.listeners:
                     listener.info()
                     listener.update(now)
         else:
+            print("test2")
             for listener in self.listeners:
                 listener.info()
                 listener.update(now)

@@ -27,14 +27,21 @@ class CpuStatsListener():
         df = pd.DataFrame()
         for device in self.devices:
             name = device.name
+            print(name)
             time = device.time
             util = np.array(device.util)
             temperature = np.array(device.temperature)
             new_df = pd.DataFrame({"time": time,
                                    "name":name,
                                    "utilisation": util,
-                                   "temperature": temperature}, index=["time"])
-            df = df.append(new_df)
+                                   "temperature": temperature})#, index=["time"])
+            print(df.head(100))
+            print(new_df.head(100))
+            print("============================")
+            df = df.append(new_df, ignore_index=True)
+        df = df.sort_values("time")
+        print(df.head(100))
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         return df
 
     def update(self, update_time):
@@ -44,12 +51,12 @@ class CpuStatsListener():
         if len(self.devices[0].util) > 12:
             statistic = self.get_statistic()
             if not self.saved:
-                statistic.to_excel(self.log_file_name, index=False)
+                statistic.to_excel(self.log_file_name)
                 self.saved = True
             else:
                 old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
                 full_statistic = old_statistic.append(statistic)
-                full_statistic.to_excel(self.log_file_name, index=False)
+                full_statistic.to_excel(self.log_file_name)
             self.clear_devices_data()
 
     def update_time(self, update_time):
@@ -122,7 +129,7 @@ class HDDLStatsListener():
             new_df = pd.DataFrame({"time": time,
                                    "name":name,
                                    "utilisation": util,
-                                   "temperature": temperature}, index=["time"])
+                                   "temperature": temperature})
             df = df.append(new_df)
         return df
 
@@ -138,7 +145,7 @@ class HDDLStatsListener():
         ret, data = self.try_to_grub_data(daemon_output, current_key_word, current_dtype)
         if ret:
             if current_key_word == "deviceId":
-                if len(data) != len(self.devices):
+                if not len(self.devices):
                     self.devices = [Device(device_name) for device_name in data]
                 self.update_key_words_idx()
             elif current_key_word == "util%":
@@ -149,8 +156,8 @@ class HDDLStatsListener():
                 for device, temperature in zip(self.devices, data):
                     device.update_temperature(temperature)
                 self.update_key_words_idx()
-                full_update = True
                 self.update_time(update_time)
+                full_update = True
         if full_update:
             if len(self.devices[0].util) > 12:
                 statistic = self.get_statistic()
@@ -160,7 +167,7 @@ class HDDLStatsListener():
                 else:
                     old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
                     full_statistic = old_statistic.append(statistic)
-                    full_statistic.to_excel(self.log_file_name, index=False)
+                    full_statistic.to_excel(self.log_file_name)
                 self.clear_devices_data()
         return full_update
 
@@ -251,12 +258,11 @@ class Device():
         self.temperature.append(temperature)
 
     def info(self):
-        if len(self.name):
-            print("\tdevice {}".format(self.name))
         if len(self.util):
-            print("\tutilisation: {}".format(self.util[0]))
-            print("\ttemperature: {}".format(self.temperature[0]))
-            print("\ttime: {}".format(self.time[0]))
+            print("\tdevice {}".format(self.name))
+            print("\t\tutilisation: {}".format(self.util[0]))
+            print("\t\ttemperature: {}".format(self.temperature[0]))
+            print("\t\ttime: {}".format(self.time[0]))
 
 class RamListener():
     def __init__(self, log_dir):
