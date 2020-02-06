@@ -9,6 +9,9 @@ from src.Threads import ListenersThreads, InferExecutorThread
 from src.InferExecutor import InferExecutor
 
 
+if "logs" not in os.listdir(os.getcwd()):
+    os.mkdir("logs")
+
 devices = ["CPU"] #"HDDL"
 now = datetime.now().strftime("%d-%m-%Y|%H:%M:%S")
 current_logs_dir = os.path.join("logs", now)

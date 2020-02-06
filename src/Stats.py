@@ -5,7 +5,6 @@ import psutil
 from time import sleep
 import subprocess
 import pandas as pd
-from datetime import datetime
 import numpy as np
 
 
@@ -153,15 +152,15 @@ class HDDLStatsListener():
                 full_update = True
                 self.update_time(update_time)
         if full_update:
-            if len(self.devices[0].util) > 0:
+            if len(self.devices[0].util) > 10:
                 statistic = self.get_statistic()
                 if not self.saved:
-                    statistic.to_excel(self.log_file_name)
+                    statistic.to_excel(self.log_file_name, index=False)
                     self.saved = True
                 else:
                     old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
                     full_statistic = old_statistic.append(statistic)
-                    full_statistic.to_excel(self.log_file_name)
+                    full_statistic.to_excel(self.log_file_name, index=False)
                 self.clear_devices_data()
         return full_update
 
