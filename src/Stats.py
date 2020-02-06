@@ -33,7 +33,7 @@ class CpuStatsListener():
             new_df = pd.DataFrame({"name":name,
                                    "time": time,
                                    "utilisation": util,
-                                   "temperature": temperature}, index=["name"])
+                                   "temperature": temperature})
             df = df.append(new_df)
         return df
 
