@@ -27,7 +27,6 @@ class CpuStatsListener():
         df = pd.DataFrame()
         for device in self.devices:
             name = device.name
-            print(name)
             time = device.time
             util = np.array(device.util)
             temperature = np.array(device.temperature)
@@ -35,20 +34,15 @@ class CpuStatsListener():
                                    "name":name,
                                    "utilisation": util,
                                    "temperature": temperature})#, index=["time"])
-            print(df.head(100))
-            print(new_df.head(100))
-            print("============================")
             df = df.append(new_df, ignore_index=True)
         df = df.sort_values("time")
-        print(df.head(100))
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         return df
 
     def update(self, update_time):
         self.update_cpu_usage()
         self.update_cpu_temperature()
         self.update_time(update_time)
-        if len(self.devices[0].util) > 12:
+        if len(self.devices[0].util) >= 3:
             statistic = self.get_statistic()
             if not self.saved:
                 statistic.to_excel(self.log_file_name)
@@ -106,8 +100,8 @@ class HDDLStatsListener():
         print("Please wait. Loading may take a few minutes.")
         self.daemon = self.init_daemon(start_daemon_command)
         self.wait_for_loading()
-        self.key_words = ["deviceId", "util%", "thermal"]
-        self.data_dtypes = [str, float, float]
+        self.key_words = ["deviceId", "util%", "thermal", "Time:"]
+        self.data_dtypes = [str, float, float, str]
         self.key_words_idx = 0
 
     def info(self):
@@ -131,6 +125,7 @@ class HDDLStatsListener():
                                    "utilisation": util,
                                    "temperature": temperature})
             df = df.append(new_df)
+        df = df.sort_values("time")
         return df
 
     def update_time(self, update_time):
@@ -148,32 +143,45 @@ class HDDLStatsListener():
                 if not len(self.devices):
                     self.devices = [Device(device_name) for device_name in data]
                 self.update_key_words_idx()
+
             elif current_key_word == "util%":
                 for device, util in zip(self.devices, data):
                     device.update_util(util)
                 self.update_key_words_idx()
+
             elif current_key_word == "thermal":
                 for device, temperature in zip(self.devices, data):
                     device.update_temperature(temperature)
                 self.update_key_words_idx()
-                self.update_time(update_time)
+
+            elif current_key_word == "Time:":
+                self.update_time(data)
                 full_update = True
+                self.update_key_words_idx()
+
+
         if full_update:
-            if len(self.devices[0].util) > 12:
+            if len(self.devices[0].util) >= 3:
                 statistic = self.get_statistic()
-                if not self.saved:
-                    statistic.to_excel(self.log_file_name, index=False)
-                    self.saved = True
-                else:
+                if  self.saved:
                     old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
                     full_statistic = old_statistic.append(statistic)
                     full_statistic.to_excel(self.log_file_name)
+                else:
+                    statistic.to_excel(self.log_file_name, index=False)
+                    self.saved = True
                 self.clear_devices_data()
-        return full_update
+        return full_update, data
 
     def try_to_grub_data(self, data, key_word, dst_dtype=None):
         if key_word in data:
+            if key_word == "Time:":
+                splited_data = data.split(" ")
+                splited_data = splited_data[-1]
+                splited_data = splited_data.split(".")
+                return  True, splited_data[0]
             splited_data = self.split_str_data(data)
+
             splited_data = self.remove_label_from_data(splited_data)
             if key_word == "thermal":
                 splited_data = [val[:-3] for val in splited_data] # removing "(0)"
@@ -196,7 +204,6 @@ class HDDLStatsListener():
                 self.running = True
             else:
                 loading_counter = self.animate_loading(loading_counter)
-        print("\n")
 
     def read_daemon_info(self):
         data = self.daemon.stdout.readline()

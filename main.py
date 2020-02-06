@@ -12,7 +12,7 @@ from src.InferExecutor import InferExecutor
 if "logs" not in os.listdir(os.getcwd()):
     os.mkdir("logs")
 
-devices = ["CPU"]# ,"HDDL"]
+devices = ["HDDL", "CPU"]
 now = datetime.now().strftime("%d-%m-%Y|%H:%M:%S")
 current_logs_dir = os.path.join("logs", now)
 os.mkdir(current_logs_dir)
