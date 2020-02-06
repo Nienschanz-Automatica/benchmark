@@ -27,11 +27,13 @@ class ListenersThreads(Thread):
             self.update_listeners()
 
     def update_listeners(self):
-        if not self.hddl_listener is None:
-            if self.hddl_listener.update():
+        if self.hddl_listener is not None:
+            ret = self.hddl_listener.update()
+            if ret:
                 for listener in self.listeners:
                     listener.update()
                     listener.info()
+                self.hddl_listener.info()
         else:
             for listener in self.listeners:
                 listener.update()

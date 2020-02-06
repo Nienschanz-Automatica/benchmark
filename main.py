@@ -12,7 +12,7 @@ cpu_extention_dir = "/home/{}/inference_engine_samples_build/intel64/Release/lib
 cpu_extention_filename = "libcpu_extension.so"
 path_to_cpu_extention = os.path.join(cpu_extention_dir, cpu_extention_filename)
 
-devices = ["CPU", "HDDL"]
+devices = ["HDDL", "CPU"]
 request_num = 32
 
 xml_file = "model/road-segmentation-adas-0001.xml"

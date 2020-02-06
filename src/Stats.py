@@ -44,11 +44,12 @@ class CpuStatsListener():
             if len(actual_temperature) == len(self.devices):
                 for device, temperature in zip(self.devices, actual_temperature):
                     device.update_temperature(temperature)
-            elif len(actual_temperature) * 2 == len(self.devices):
-                for device, temperature in zip(self.devices[::2], actual_temperature):
-                    device.update_temperature(temperature)
-                for device, temperature in zip(self.devices[1::2], actual_temperature):
-                    device.update_temperature(temperature)
+            else:
+                cores_per_device = len(self.devices) / len(actual_temperature)
+                cores_per_device = int(cores_per_device)
+                for i in range(cores_per_device):
+                    for device, temperature in zip(self.devices[i::cores_per_device], actual_temperature):
+                        device.update_temperature(temperature)
 
 
 class HDDLStatsListener():
@@ -57,7 +58,9 @@ class HDDLStatsListener():
         start_daemon_command = os.path.join(path_to_hddldaemon, "hddldaemon")
         self.encoding_type = "utf-8"
         self.running = False
+        print("Please wait. Loading may take a few minutes.")
         self.daemon = self.init_daemon(start_daemon_command)
+        self.wait_for_loading()
         self.key_words = ["deviceId", "util%", "thermal"]
         self.data_dtypes = [str, float, float]
         self.key_words_idx = 0
@@ -77,9 +80,11 @@ class HDDLStatsListener():
             if current_key_word == "deviceId":
                 if len(data) != len(self.devices):
                     self.devices = [Device(device_name) for device_name in data]
+                self.update_key_words_idx()
             elif current_key_word == "util%":
                 for device, util in zip(self.devices, data):
                     device.update_util(util)
+                self.update_key_words_idx()
             elif current_key_word == "thermal":
                 for device, temperature in zip(self.devices, data):
                     device.update_temperature(temperature)
@@ -103,7 +108,6 @@ class HDDLStatsListener():
         return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     def wait_for_loading(self):
-        print("Please wait. Loading may take a few minutes.")
         ready_key_words = ["SERVICE", "IS", "READY"]
         loading_counter = 0
         while not self.running:
@@ -113,6 +117,7 @@ class HDDLStatsListener():
                 self.running = True
             else:
                 loading_counter = self.animate_loading(loading_counter)
+        print("\n")
 
     def read_daemon_info(self):
         data = self.daemon.stdout.readline()
@@ -124,7 +129,7 @@ class HDDLStatsListener():
         sys.stdout.write("\r" + "Loading " + animation[loading_counter % len(animation)])
         loading_counter += 1
         sys.stdout.flush()
-        sleep(0.5)
+        sleep(0.1)
         return loading_counter
 
     def split_str_data(self, str_data):
@@ -177,7 +182,7 @@ class RamListener():
         self.percents = []
 
     def update(self):
-        passf
+        pass
 
     def update_total(self, value):
         self.total = value
