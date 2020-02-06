@@ -31,6 +31,9 @@ def build_executors(xml_file, bin_file, devices, requests_num):
         if device == "CPU":
             config = {"CPU_THREADS_NUM": "0", "CPU_THROUGHPUT_STREAMS": str(request_num)}
             plugin.add_cpu_extension(path_to_cpu_extention)
+        elif devices == "HDDL":
+            config = {"LOG_LEVEL": "LOG_INFO",
+                      "VPU_LOG_LEVEL": "LOG_INFO"}
         else:
             config = {}
         plugin.set_config(config)
