@@ -4,21 +4,58 @@ import yaml
 import psutil
 from time import sleep
 import subprocess
+import pandas as pd
 from datetime import datetime
+import numpy as np
 
 
 class CpuStatsListener():
-    def __init__(self):
+    def __init__(self, log_dir):
         self.devices = []
+        self.log_file_name = os.path.join(log_dir, "CPU", "cpu.xlsx")
+        self.saved = False
 
     def info(self):
         print("CPU INFO:")
         for device in self.devices:
             device.info()
 
-    def update(self):
+    def clear_devices_data(self):
+        for device in self.devices:
+            device.clear_fields()
+
+    def get_statistic(self):
+        df = pd.DataFrame()
+        for device in self.devices:
+            name = device.name
+            time = device.time
+            util = np.array(device.util)
+            temperature = np.array(device.temperature)
+            new_df = pd.DataFrame({"name":name,
+                               "time": time,
+                               "utilisation": util,
+                               "temperature": temperature})
+            df = df.append(new_df)
+        return df
+
+    def update(self, update_time):
         self.update_cpu_usage()
         self.update_cpu_temperature()
+        self.update_time(update_time)
+        if len(self.devices[0].util) > 0:
+            statistic = self.get_statistic()
+            if not self.saved:
+                statistic.to_excel(self.log_file_name)
+                self.saved = True
+            else:
+                old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
+                full_statistic = old_statistic.append(statistic)
+                full_statistic.to_excel(self.log_file_name)
+            self.clear_devices_data()
+
+    def update_time(self, update_time):
+        for device in self.devices:
+            device.update_time(update_time)
 
     def update_cpu_usage(self):
         cpu_usage = psutil.cpu_percent(percpu=True)
@@ -53,7 +90,9 @@ class CpuStatsListener():
 
 
 class HDDLStatsListener():
-    def __init__(self, path_to_hddldaemon):
+    def __init__(self, path_to_hddldaemon, log_dir):
+        self.log_file_name = os.path.join(log_dir, "HDDL", "hddl.xlsx")
+        self.saved = False
         self.devices = []
         start_daemon_command = os.path.join(path_to_hddldaemon, "hddldaemon")
         self.encoding_type = "utf-8"
@@ -70,7 +109,29 @@ class HDDLStatsListener():
         for device in self.devices:
             device.info()
 
-    def update(self):
+    def clear_devices_data(self):
+        for device in self.devices:
+            device.clear_fields()
+
+    def get_statistic(self):
+        df = pd.DataFrame()
+        for device in self.devices:
+            name = device.name
+            time = device.time
+            util = np.array(device.util)
+            temperature = np.array(device.temperature)
+            new_df = pd.DataFrame({"name":name,
+                               "time": time,
+                               "utilisation": util,
+                               "temperature": temperature})
+            df = df.append(new_df)
+        return df
+
+    def update_time(self, update_time):
+        for device in self.devices:
+            device.update_time(update_time)
+
+    def update(self, update_time):
         full_update = False
         current_key_word = self.get_current_key_word()
         current_dtype = self.get_current_dtype()
@@ -90,6 +151,18 @@ class HDDLStatsListener():
                     device.update_temperature(temperature)
                 self.update_key_words_idx()
                 full_update = True
+                self.update_time(update_time)
+        if full_update:
+            if len(self.devices[0].util) > 0:
+                statistic = self.get_statistic()
+                if not self.saved:
+                    statistic.to_excel(self.log_file_name)
+                    self.saved = True
+                else:
+                    old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
+                    full_statistic = old_statistic.append(statistic)
+                    full_statistic.to_excel(self.log_file_name)
+                self.clear_devices_data()
         return full_update
 
     def try_to_grub_data(self, data, key_word, dst_dtype=None):
@@ -162,6 +235,15 @@ class Device():
         self.name = name
         self.util = []
         self.temperature = []
+        self.time = []
+
+    def clear_fields(self):
+        self.util = []
+        self.temperature = []
+        self.time = []
+
+    def update_time(self, update_time):
+        self.time.append(update_time)
 
     def update_util(self, util):
         self.util.append(util)
@@ -173,16 +255,22 @@ class Device():
         print("\t{}".format(self.name))
         print("\tutilisation: {}".format(self.util))
         print("\ttemperature: {}".format(self.temperature))
+        print("\ttime: {}".format(self.time))
 
 class RamListener():
-    def __init__(self):
+    def __init__(self, log_dir):
+        self.log_dir = log_dir
         self.total = None
         self.available = []
         self.used = []
         self.percents = []
+        self.time = []
 
     def update(self):
         pass
+
+    def update_time(self, update_time):
+        self.time.append(update_time)
 
     def update_total(self, value):
         self.total = value
@@ -202,3 +290,4 @@ class RamListener():
         print("\tavailable: {}".format(self.available))
         print("\tused: {}".format(self.used))
         print("\tpercents: {}".format(self.percents))
+        print("\ttime: {}".format(self.time))
