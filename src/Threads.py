@@ -1,5 +1,6 @@
 from threading import Thread
-
+from src.Stats import HDDLStatsListener
+from time import sleep
 
 class InferExecutorThread(Thread):
     def __init__(self, device, infer_executor):
@@ -12,11 +13,27 @@ class InferExecutorThread(Thread):
             self.executor.update()
 
 
-class HddldaemonThread(Thread):
-    def __init__(self, daemon_listener):
+class ListenersThreads(Thread):
+    def __init__(self, listeners_list):
         Thread.__init__(self)
-        self.daemon_listener = daemon_listener
+        self.listeners = listeners_list
+        self.hddl_listener = None
+        for idx, listener in enumerate(self.listeners):
+            if isinstance(listener, HDDLStatsListener):
+                self.hddl_listener = self.listeners.pop(idx)
 
     def run(self):
         while True:
-            self.daemon_listener.update()
+            self.update_listeners()
+
+    def update_listeners(self):
+        if not self.hddl_listener is None:
+            if self.hddl_listener.update():
+                for listener in self.listeners:
+                    listener.update()
+                    listener.info()
+        else:
+            for listener in self.listeners:
+                listener.update()
+                listener.info()
+            sleep(5)
