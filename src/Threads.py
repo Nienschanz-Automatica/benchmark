@@ -33,12 +33,12 @@ class ListenersThreads(Thread):
         if self.hddl_listener is not None:
             ret = self.hddl_listener.update(now)
             if ret:
-                for listener in self.listeners:
-                    listener.update(now)
-                    listener.info()
                 self.hddl_listener.info()
+                for listener in self.listeners:
+                    listener.info()
+                    listener.update(now)
         else:
             for listener in self.listeners:
-                listener.update(now)
                 listener.info()
+                listener.update(now)
             sleep(5)

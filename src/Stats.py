@@ -30,10 +30,10 @@ class CpuStatsListener():
             time = device.time
             util = np.array(device.util)
             temperature = np.array(device.temperature)
-            new_df = pd.DataFrame({"name":name,
-                                   "time": time,
+            new_df = pd.DataFrame({"time": time,
+                                   "name":name,
                                    "utilisation": util,
-                                   "temperature": temperature})
+                                   "temperature": temperature}, index=["time"])
             df = df.append(new_df)
         return df
 
@@ -41,7 +41,7 @@ class CpuStatsListener():
         self.update_cpu_usage()
         self.update_cpu_temperature()
         self.update_time(update_time)
-        if len(self.devices[0].util) > 10:
+        if len(self.devices[0].util) > 12:
             statistic = self.get_statistic()
             if not self.saved:
                 statistic.to_excel(self.log_file_name, index=False)
@@ -119,10 +119,10 @@ class HDDLStatsListener():
             time = device.time
             util = np.array(device.util)
             temperature = np.array(device.temperature)
-            new_df = pd.DataFrame({"name":name,
-                               "time": time,
-                               "utilisation": util,
-                               "temperature": temperature})
+            new_df = pd.DataFrame({"time": time,
+                                   "name":name,
+                                   "utilisation": util,
+                                   "temperature": temperature}, index=["time"])
             df = df.append(new_df)
         return df
 
@@ -152,7 +152,7 @@ class HDDLStatsListener():
                 full_update = True
                 self.update_time(update_time)
         if full_update:
-            if len(self.devices[0].util) > 10:
+            if len(self.devices[0].util) > 12:
                 statistic = self.get_statistic()
                 if not self.saved:
                     statistic.to_excel(self.log_file_name, index=False)
@@ -251,10 +251,12 @@ class Device():
         self.temperature.append(temperature)
 
     def info(self):
-        print("\t{}".format(self.name))
-        print("\tutilisation: {}".format(self.util))
-        print("\ttemperature: {}".format(self.temperature))
-        print("\ttime: {}".format(self.time))
+        if len(self.name):
+            print("\tdevice {}".format(self.name))
+        if len(self.util):
+            print("\tutilisation: {}".format(self.util[0]))
+            print("\ttemperature: {}".format(self.temperature[0]))
+            print("\ttime: {}".format(self.time[0]))
 
 class RamListener():
     def __init__(self, log_dir):
