@@ -333,7 +333,7 @@ class RamListener():
                      "percents": self.percents}
         df = pd.DataFrame(data_dict)
         df = df.sort_values("time")
-        return data_dict
+        return df
 
     def save_statistic(self, statistic):
         if not self.saved:
