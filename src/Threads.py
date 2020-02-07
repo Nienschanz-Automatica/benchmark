@@ -31,7 +31,7 @@ class ListenersThreads(Thread):
         now = datetime.now()
         now = now.strftime("%H:%M:%S")
         if self.hddl_listener is not None:
-            ret, now = self.hddl_listener.update(now)
+            ret, now = self.hddl_listener.update()
             if ret:
                 self.hddl_listener.info()
                 for listener in self.listeners:

@@ -13,6 +13,8 @@ if "logs" not in os.listdir(os.getcwd()):
     os.mkdir("logs")
 
 devices = ["HDDL", "CPU"]
+save_every_minutes = 1
+
 now = datetime.now().strftime("%d-%m-%Y|%H:%M:%S")
 current_logs_dir = os.path.join("logs", now)
 os.mkdir(current_logs_dir)
@@ -66,11 +68,11 @@ def build_listeners(devices):
     listeners = []
     for device in devices:
         if device == "CPU":
-            listeners.append(CpuStatsListener(current_logs_dir))
+            listeners.append(CpuStatsListener(current_logs_dir, save_every_minutes))
         elif device == "HDDL":
             path_to_daemon = "/opt/intel/openvino/deployment_tools/inference_engine/external/hddl/bin/"
-            listeners.append(HDDLStatsListener(path_to_daemon, current_logs_dir))
-    # listeners.append(RamListener(current_logs_dir))
+            listeners.append(HDDLStatsListener(path_to_daemon, current_logs_dir, save_every_minutes))
+    listeners.append(RamListener(current_logs_dir, save_every_minutes))
     return listeners
 
 
