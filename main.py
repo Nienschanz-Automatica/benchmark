@@ -35,7 +35,6 @@ def build_executors(xml_file, bin_file, devices, requests_num):
         threads_list.append(executor_thread)
     return threads_list
 
-
 def build_listeners(devices):
     listeners = []
     for device in devices:

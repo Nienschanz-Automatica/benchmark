@@ -20,6 +20,7 @@ class InferExecutorThread(Thread):
             self.executor.update()
 
     def stop(self):
+        self.executor.stop()
         self._stopper.set()
 
     def stopped(self):
