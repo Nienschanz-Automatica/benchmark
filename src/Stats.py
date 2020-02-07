@@ -30,7 +30,6 @@ class CpuStatsListener():
     def info(self):
         if len(self.devices):
             if len(self.devices[0].time):
-                print("=" * 8 * len(self.devices))
                 print("CPU INFO:")
                 if len(self.devices[0].time):
                     print("time: {}".format(self.devices[0].time[-1]))
@@ -164,7 +163,6 @@ class HDDLStatsListener():
     def info(self):
         if len(self.devices):
             if len(self.devices[0].time):
-                print("=" * 8 * len(self.devices))
                 print("HDDL INFO:")
                 if len(self.devices[0].time):
                     print("time: {}".format(self.devices[0].time[-1]))
