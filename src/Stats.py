@@ -37,7 +37,7 @@ class CpuStatsListener():
             device_data = device.get_data_dict()
             new_df = pd.DataFrame(device_data)
             df = df.append(new_df, ignore_index=True)
-        df = df.sort_values("time")
+        df = df.sort_values(by=["time", "name"])
         return df
 
     def update(self, update_time):
@@ -140,7 +140,7 @@ class HDDLStatsListener():
             device_data = device.get_data_dict()
             new_df = pd.DataFrame(device_data)
             df = df.append(new_df)
-        df = df.sort_values("time")
+        df = df.sort_values(by=["time", "name"])
         return df
 
     def update(self):
@@ -326,11 +326,13 @@ class RamListener():
             return False
 
     def get_statistic(self):
-        data_dict = {"total": self.total,
+        data_dict = {"time": self.time,
+                     "total": self.total,
                      "available": self.available,
                      "used": self.used,
-                     "percents": self.percents,
-                     "time": self.time}
+                     "percents": self.percents}
+        df = pd.DataFrame(data_dict)
+        df = df.sort_values("time")
         return data_dict
 
     def save_statistic(self, statistic):
@@ -354,13 +356,14 @@ class RamListener():
             self.save_statistic(ram_data)
             self.clear_data()
 
-    def bytes_to_readable(self, size_in_bytes, precision=2):
-        suffixes = ['B', 'KB', 'MB', 'GB', 'TB']
+    def bytes_to_readable(self, size, precision=2):
+        suffixes = ['B', 'KB', 'MB', 'GB']
         suffixIndex = 0
-        while size_in_bytes > 1024 and suffixIndex < 4:
+        while size > 1024 and suffixIndex < 3:
             suffixIndex += 1  # increment the index of the suffix
-        size = size_in_bytes / 1024.0  # apply the division
-        return "%.*f%s" % (precision, size, suffixes[suffixIndex])
+            size = size / 1024.0  # apply the division
+        size = round(size, precision)
+        return "{} {}".format(size, suffixes[suffixIndex])
 
 
     def clear_data(self):
@@ -386,9 +389,10 @@ class RamListener():
         self.percents.append(val)
 
     def info(self):
-        print("RAM INFO:")
-        print("\ttotal: {}".format(self.total))
-        print("\tavailable: {}".format(self.available[-1]))
-        print("\tused: {}".format(self.used[-1]))
-        print("\tpercents: {}".format(self.percents[-1]))
-        print("\ttime: {}".format(self.time[-1]))
+        if len(self.available):
+            print("RAM INFO:")
+            print("\ttotal: {}".format(self.total))
+            print("\tavailable: {}".format(self.available[-1]))
+            print("\tused: {}".format(self.used[-1]))
+            print("\tpercents: {}".format(self.percents[-1]))
+            print("\ttime: {}".format(self.time[-1]))
