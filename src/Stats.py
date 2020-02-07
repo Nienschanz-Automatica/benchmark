@@ -9,7 +9,7 @@ from time import sleep
 class CpuStatsListener():
     def __init__(self, log_dir, save_every_minutes):
         self.devices = []
-        self.log_file_name = os.path.join(log_dir, "CPU", "cpu.xlsx")
+        self.log_file_name = os.path.join(log_dir, "CPU", "cpu.csv")
         self.save_every_minutes = save_every_minutes
         self.saved = False
 
@@ -76,12 +76,10 @@ class CpuStatsListener():
 
     def save_statistic(self, statistic):
         if not self.saved:
-            statistic.to_excel(self.log_file_name)
+            statistic.to_csv(self.log_file_name, index=False)
             self.saved = True
         else:
-            old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
-            full_statistic = old_statistic.append(statistic)
-            full_statistic.to_excel(self.log_file_name)
+            statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
 
     def update_time(self, update_time):
         for device in self.devices:
@@ -127,7 +125,7 @@ class CpuStatsListener():
 
 class HDDLStatsListener():
     def __init__(self, path_to_hddldaemon, log_dir, save_every_minutes):
-        self.log_file_name = os.path.join(log_dir, "HDDL", "hddl.xlsx")
+        self.log_file_name = os.path.join(log_dir, "HDDL", "hddl.csv")
         self.save_every_minutes = save_every_minutes
         self.saved = False
         self.devices = []
@@ -240,12 +238,10 @@ class HDDLStatsListener():
 
     def save_statistic(self, statistic):
         if not self.saved:
-            statistic.to_excel(self.log_file_name, index=False)
+            statistic.to_csv(self.log_file_name, index=False)
             self.saved = True
         else:
-            old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
-            full_statistic = old_statistic.append(statistic)
-            full_statistic.to_excel(self.log_file_name)
+            statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
 
     def parse_hddl_daemon_outout(self, data, key_word, dst_dtype=None):
         if key_word in data:
@@ -356,7 +352,7 @@ class Device():
 
 class RamListener():
     def __init__(self, log_dir, save_every_minutes):
-        self.log_file_name = os.path.join(log_dir, "RAM", "ram.xlsx")
+        self.log_file_name = os.path.join(log_dir, "RAM", "ram.csv")
         self.save_every_minutes = save_every_minutes
         self.saved = False
         self.total = None
@@ -385,12 +381,10 @@ class RamListener():
 
     def save_statistic(self, statistic):
         if not self.saved:
-            statistic.to_excel(self.log_file_name, index=False)
+            statistic.to_csv(self.log_file_name, index=False)
             self.saved = True
         else:
-            old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
-            full_statistic = old_statistic.append(statistic)
-            full_statistic.to_excel(self.log_file_name)
+            statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
 
     def update(self, time):
         memory_data = psutil.virtual_memory()

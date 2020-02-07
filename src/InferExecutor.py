@@ -16,3 +16,8 @@ class InferExecutor():
         self.current_inference += 1
         if self.current_inference >= len(self.infer_requests):
             self.current_inference = 0
+
+    def stop(self):
+       for i in range(len(self.infer_requests)):
+           while not self.infer_requests[self.current_inference].wait(-1) == 0:
+               pass
