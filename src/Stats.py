@@ -79,8 +79,6 @@ class CpuStatsListener():
             statistic.to_csv(self.log_file_name, index=False)
             self.saved = True
         else:
-            # old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
-            # full_statistic = old_statistic.append(statistic)
             statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
 
     def update_time(self, update_time):
@@ -243,8 +241,6 @@ class HDDLStatsListener():
             statistic.to_csv(self.log_file_name, index=False)
             self.saved = True
         else:
-            # old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
-            # full_statistic = old_statistic.append(statistic)
             statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
 
     def parse_hddl_daemon_outout(self, data, key_word, dst_dtype=None):
@@ -388,8 +384,6 @@ class RamListener():
             statistic.to_csv(self.log_file_name, index=False)
             self.saved = True
         else:
-            # old_statistic = pd.read_excel(self.log_file_name, usecols=lambda x: 'Unnamed' not in x)
-            # full_statistic = old_statistic.append(statistic)
             statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
 
     def update(self, time):
