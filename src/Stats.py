@@ -21,11 +21,35 @@ class CpuStatsListener():
         else:
             return False
 
-    def info(self):
+    def old_info(self):
         if len(self.devices):
             print("CPU INFO:")
         for device in self.devices:
             device.info()
+
+    def info(self):
+        if len(self.devices):
+            if len(self.devices[0].time):
+                print("=" * 8 * len(self.devices))
+                print("CPU INFO:")
+                print(self.devices[0].time[-1])
+                names = [device.name for device in self.devices]
+                usage = [device.util[-1] for device in self.devices if len(device.util)]
+                temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
+                names_str = self.create_info_string(names)
+                usage_str = self.create_info_string(usage)
+                temperature_str = self.create_info_string(temperature)
+                print(names_str)
+                print(usage_str)
+                print(temperature_str)
+                print("=" * 8 * len(self.devices))
+
+    def create_info_string(self, data):
+        string = ""
+        for val in data:
+            string += "|{:^8}".format(val)
+            string += "|"
+        return string
 
     def clear_devices_data(self):
         for device in self.devices:
@@ -124,11 +148,35 @@ class HDDLStatsListener():
         else:
             return False
 
-    def info(self):
+    def old_info(self):
         if len(self.devices):
             print("HDDL INFO:")
-        for device in self.devices:
-            device.info()
+            for device in self.devices:
+                device.info()
+
+    def info(self):
+        if len(self.devices):
+            if len(self.devices[0].time):
+                print("=" * 8 * len(self.devices))
+                print("HDDL INFO:")
+                print(self.devices[0].time[-1])
+                names = [device.name for device in self.devices]
+                usage = [device.util[-1] for device in self.devices if len(device.util)]
+                temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
+                names_str = self.create_info_string(names)
+                usage_str = self.create_info_string(usage)
+                temperature_str = self.create_info_string(temperature)
+                print(names_str)
+                print(usage_str)
+                print(temperature_str)
+                print("=" * 8 * len(self.devices))
+
+    def create_info_string(self, data):
+        string = ""
+        for val in data:
+            string += "|{:^8}".format(val)
+            string += "|"
+        return string
 
     def clear_devices_data(self):
         for device in self.devices:
