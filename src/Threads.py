@@ -35,10 +35,10 @@ class ListenersThreads(Thread):
             if ret:
                 self.hddl_listener.info()
                 for listener in self.listeners:
-                    listener.info()
                     listener.update(now)
+                    listener.info()
         else:
             for listener in self.listeners:
-                listener.info()
                 listener.update(now)
+                listener.info()
             sleep(5)

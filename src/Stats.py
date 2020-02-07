@@ -33,7 +33,7 @@ class CpuStatsListener():
                 print("=" * 8 * len(self.devices))
                 print("CPU INFO:")
                 if len(self.devices[0].time):
-                    print(self.devices[0].time[-1])
+                    print("time: {}".format(self.devices[0].time[-1]))
                     names = [device.name for device in self.devices]
                     usage = [device.util[-1] for device in self.devices if len(device.util)]
                     temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
@@ -167,7 +167,7 @@ class HDDLStatsListener():
                 print("=" * 8 * len(self.devices))
                 print("HDDL INFO:")
                 if len(self.devices[0].time):
-                    print(self.devices[0].time[-1])
+                    print("time: {}".format(self.devices[0].time[-1]))
                     names = [device.name for device in self.devices]
                     usage = [device.util[-1] for device in self.devices if len(device.util)]
                     temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
