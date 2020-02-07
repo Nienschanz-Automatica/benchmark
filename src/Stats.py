@@ -54,7 +54,7 @@ class CpuStatsListener():
         string = ""
         for val in data:
             string += "|{:^8}".format(val)
-            string += "|"
+        string += "|"
         return string
 
     def clear_devices_data(self):
