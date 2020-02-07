@@ -6,12 +6,12 @@ import pandas as pd
 from time import sleep
 
 
-class CpuStatsListener():
-    def __init__(self, log_dir, save_every_minutes):
-        self.devices = []
-        self.log_file_name = os.path.join(log_dir, "CPU", "cpu.csv")
+class Listener():
+    def __init__(self, save_every_minutes):
         self.save_every_minutes = save_every_minutes
+        self.devices = []
         self.saved = False
+        self.log_file_name = None
 
     def ready_to_save(self):
         seconds = self.save_every_minutes * 60
@@ -20,6 +20,43 @@ class CpuStatsListener():
             return len(self.devices[0].util) == dst_records_num
         else:
             return False
+
+    def create_info_string(self, data):
+        string = ""
+        for val in data:
+            string += "|{:^8}".format(val)
+        string += "|"
+        return string
+
+    def clear_devices_data(self):
+        for device in self.devices:
+            device.clear_fields()
+
+    def get_statistic(self):
+        df = pd.DataFrame()
+        for device in self.devices:
+            device_data = device.get_data_dict()
+            new_df = pd.DataFrame(device_data)
+            df = df.append(new_df, ignore_index=True)
+        df = df.sort_values(by=["time", "name"])
+        return df
+
+    def save_statistic(self, statistic):
+        if not self.saved:
+            statistic.to_csv(self.log_file_name, index=False)
+            self.saved = True
+        else:
+            statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
+
+    def update_time(self, update_time):
+        for device in self.devices:
+            device.update_time(update_time)
+
+
+class CpuStatsListener(Listener):
+    def __init__(self, log_dir, save_every_minutes):
+        Listener.__init__(self, save_every_minutes)
+        self.log_file_name = os.path.join(log_dir, "CPU", "cpu.csv")
 
     def info(self):
         if len(self.devices):
@@ -44,26 +81,6 @@ class CpuStatsListener():
                     print(temperature_string)
                     print("=" * len(names_string))
 
-    def create_info_string(self, data):
-        string = ""
-        for val in data:
-            string += "|{:^8}".format(val)
-        string += "|"
-        return string
-
-    def clear_devices_data(self):
-        for device in self.devices:
-            device.clear_fields()
-
-    def get_statistic(self):
-        df = pd.DataFrame()
-        for device in self.devices:
-            device_data = device.get_data_dict()
-            new_df = pd.DataFrame(device_data)
-            df = df.append(new_df, ignore_index=True)
-        df = df.sort_values(by=["time", "name"])
-        return df
-
     def update(self, update_time):
         self.update_devices_list()
         self.update_cpu_usage()
@@ -73,17 +90,6 @@ class CpuStatsListener():
             statistic = self.get_statistic()
             self.save_statistic(statistic)
             self.clear_devices_data()
-
-    def save_statistic(self, statistic):
-        if not self.saved:
-            statistic.to_csv(self.log_file_name, index=False)
-            self.saved = True
-        else:
-            statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
-
-    def update_time(self, update_time):
-        for device in self.devices:
-            device.update_time(update_time)
 
     def update_devices_list(self):
         if not len(self.devices):
@@ -123,14 +129,12 @@ class CpuStatsListener():
             return actual_temperature
 
 
-class HDDLStatsListener():
+class HddlStatsListener(Listener):
     def __init__(self, path_to_hddldaemon, log_dir, save_every_minutes):
+        Listener.__init__(self, save_every_minutes)
         self.log_file_name = os.path.join(log_dir, "HDDL", "hddl.csv")
-        self.save_every_minutes = save_every_minutes
-        self.saved = False
-        self.devices = []
-        start_daemon_command = os.path.join(path_to_hddldaemon, "hddldaemon")
         self.running = False
+        start_daemon_command = os.path.join(path_to_hddldaemon, "hddldaemon")
         print("Please wait. Loading may take a few minutes.")
         self.daemon = self.init_daemon(start_daemon_command)
         self.wait_for_loading()
@@ -138,56 +142,27 @@ class HDDLStatsListener():
         self.data_dtypes = [str, float, float, str]
         self.key_words_idx = 0
 
-    def ready_to_save(self):
-        seconds = self.save_every_minutes * 60
-        dst_records_num = int(seconds // 5)
-        if len(self.devices):
-            return len(self.devices[0].util) == dst_records_num
-        else:
-            return False
-
     def info(self):
         if len(self.devices):
             if len(self.devices[0].time):
                 print("HDDL INFO:")
-                if len(self.devices[0].time):
-                    print("time: {}".format(self.devices[0].time[-1]))
-                    names = [device.name for device in self.devices]
-                    usage = [device.util[-1] for device in self.devices if len(device.util)]
-                    temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
-                    names_str = self.create_info_string(names)
-                    usage_str = self.create_info_string(usage)
-                    temperature_str = self.create_info_string(temperature)
+                print("time: {}".format(self.devices[0].time[-1]))
+                names = [device.name for device in self.devices]
+                usage = [device.util[-1] for device in self.devices if len(device.util)]
+                temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
+                names_str = self.create_info_string(names)
+                usage_str = self.create_info_string(usage)
+                temperature_str = self.create_info_string(temperature)
 
-                    names_string = "{:<12}".format("device") + names_str
-                    util_string = "{:<12}".format("util(%)") + usage_str
-                    temperature_string = "{:<12}".format("temperature") + temperature_str
+                names_string = "{:<12}".format("device") + names_str
+                util_string = "{:<12}".format("util(%)") + usage_str
+                temperature_string = "{:<12}".format("temperature") + temperature_str
 
-                    print("=" * len(names_string))
-                    print(names_string)
-                    print(util_string)
-                    print(temperature_string)
-                    print("=" * len(names_string))
-
-    def create_info_string(self, data):
-        string = ""
-        for val in data:
-            string += "|{:^8}".format(val)
-        string += "|"
-        return string
-
-    def clear_devices_data(self):
-        for device in self.devices:
-            device.clear_fields()
-
-    def get_statistic(self):
-        df = pd.DataFrame()
-        for device in self.devices:
-            device_data = device.get_data_dict()
-            new_df = pd.DataFrame(device_data)
-            df = df.append(new_df)
-        df = df.sort_values(by=["time", "name"])
-        return df
+                print("=" * len(names_string))
+                print(names_string)
+                print(util_string)
+                print(temperature_string)
+                print("=" * len(names_string))
 
     def update(self):
         full_update = False
@@ -213,8 +188,7 @@ class HDDLStatsListener():
         return update_dict[update_key](data)
 
     def update_time(self, update_time):
-        for device in self.devices:
-            device.update_time(update_time)
+        Listener.update_time(self, update_time)
         full_update = True
         return full_update
 
@@ -235,13 +209,6 @@ class HDDLStatsListener():
             device.update_temperature(temperature)
         full_update = False
         return full_update
-
-    def save_statistic(self, statistic):
-        if not self.saved:
-            statistic.to_csv(self.log_file_name, index=False)
-            self.saved = True
-        else:
-            statistic.to_csv(self.log_file_name, mode="a", header=None, index=False)
 
     def parse_hddl_daemon_outout(self, data, key_word, dst_dtype=None):
         if key_word in data:
@@ -312,42 +279,6 @@ class HDDLStatsListener():
 
     def get_current_dtype(self):
         return self.data_dtypes[self.key_words_idx]
-
-
-class Device():
-    def __init__(self, name):
-        self.name = name
-        self.util = []
-        self.temperature = []
-        self.time = []
-
-    def get_data_dict(self):
-        data_dict = {"time": self.time,
-                     "name": self.name,
-                     "utilisation": self.util,
-                     "temperature": self.temperature}
-        return data_dict
-
-    def clear_fields(self):
-        self.util = []
-        self.temperature = []
-        self.time = []
-
-    def update_time(self, update_time):
-        self.time.append(update_time)
-
-    def update_util(self, util):
-        self.util.append(util)
-
-    def update_temperature(self, temperature):
-        self.temperature.append(temperature)
-
-    def info(self):
-        if len(self.util):
-            print("\tdevice {}".format(self.name))
-            print("\t\tutilisation: {}".format(self.util[-1]))
-            print("\t\ttemperature: {}".format(self.temperature[-1]))
-            print("\t\ttime: {}".format(self.time[-1]))
 
 
 class RamListener():
@@ -442,3 +373,37 @@ class RamListener():
             print("="*len(info_string))
 
 
+class Device():
+    def __init__(self, name):
+        self.name = name
+        self.util = []
+        self.temperature = []
+        self.time = []
+
+    def get_data_dict(self):
+        data_dict = {"time": self.time,
+                     "name": self.name,
+                     "utilisation": self.util,
+                     "temperature": self.temperature}
+        return data_dict
+
+    def clear_fields(self):
+        self.util = []
+        self.temperature = []
+        self.time = []
+
+    def update_time(self, update_time):
+        self.time.append(update_time)
+
+    def update_util(self, util):
+        self.util.append(util)
+
+    def update_temperature(self, temperature):
+        self.temperature.append(temperature)
+
+    def info(self):
+        if len(self.util):
+            print("\tdevice {}".format(self.name))
+            print("\t\tutilisation: {}".format(self.util[-1]))
+            print("\t\ttemperature: {}".format(self.temperature[-1]))
+            print("\t\ttime: {}".format(self.time[-1]))

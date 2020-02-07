@@ -52,7 +52,7 @@ def build_listeners(devices):
             listeners.append(CpuStatsListener())
         elif device == "HDDL":
             path_to_daemon = "/opt/intel/openvino/deployment_tools/inference_engine/external/hddl/bin/"
-            listeners.append(HDDLStatsListener(path_to_daemon))
+            listeners.append(HddlStatsListener(path_to_daemon))
     # listeners.append(RamListener())
     return listeners
 

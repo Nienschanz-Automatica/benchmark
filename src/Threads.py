@@ -1,5 +1,5 @@
 from threading import Thread, Event
-from src.Stats import HDDLStatsListener
+from src.Stats import HddlStatsListener
 from time import sleep
 from datetime import datetime
 
@@ -33,7 +33,7 @@ class ListenersThread(Thread):
         self.hddl_listener = None
         self._stopper = Event()
         for idx, listener in enumerate(self.listeners):
-            if isinstance(listener, HDDLStatsListener):
+            if isinstance(listener, HddlStatsListener):
                 self.hddl_listener = self.listeners.pop(idx)
 
     def run(self):
