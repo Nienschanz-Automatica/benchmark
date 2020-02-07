@@ -32,17 +32,24 @@ class CpuStatsListener():
             if len(self.devices[0].time):
                 print("=" * 8 * len(self.devices))
                 print("CPU INFO:")
-                print(self.devices[0].time[-1])
-                names = [device.name for device in self.devices]
-                usage = [device.util[-1] for device in self.devices if len(device.util)]
-                temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
-                names_str = self.create_info_string(names)
-                usage_str = self.create_info_string(usage)
-                temperature_str = self.create_info_string(temperature)
-                print(names_str)
-                print(usage_str)
-                print(temperature_str)
-                print("=" * 8 * len(self.devices))
+                if len(self.devices[0].time):
+                    print(self.devices[0].time[-1])
+                    names = [device.name for device in self.devices]
+                    usage = [device.util[-1] for device in self.devices if len(device.util)]
+                    temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
+                    names_str = self.create_info_string(names)
+                    usage_str = self.create_info_string(usage)
+                    temperature_str = self.create_info_string(temperature)
+
+                    names_string = "{:<12}".format("device") + names_str
+                    util_string = "{:<12}".format("util(%)") + usage_str
+                    temperature_string = "{:<12}".format("temperature") + temperature_str
+
+                    print("=" * len(names_string))
+                    print(names_string)
+                    print(util_string)
+                    print(temperature_string)
+                    print("=" * len(names_string))
 
     def create_info_string(self, data):
         string = ""
@@ -159,23 +166,30 @@ class HDDLStatsListener():
             if len(self.devices[0].time):
                 print("=" * 8 * len(self.devices))
                 print("HDDL INFO:")
-                print(self.devices[0].time[-1])
-                names = [device.name for device in self.devices]
-                usage = [device.util[-1] for device in self.devices if len(device.util)]
-                temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
-                names_str = self.create_info_string(names)
-                usage_str = self.create_info_string(usage)
-                temperature_str = self.create_info_string(temperature)
-                print(names_str)
-                print(usage_str)
-                print(temperature_str)
-                print("=" * 8 * len(self.devices))
+                if len(self.devices[0].time):
+                    print(self.devices[0].time[-1])
+                    names = [device.name for device in self.devices]
+                    usage = [device.util[-1] for device in self.devices if len(device.util)]
+                    temperature = [device.temperature[-1] for device in self.devices if len(device.temperature)]
+                    names_str = self.create_info_string(names)
+                    usage_str = self.create_info_string(usage)
+                    temperature_str = self.create_info_string(temperature)
+
+                    names_string = "{:<12}".format("device") + names_str
+                    util_string = "{:<12}".format("util(%)") + usage_str
+                    temperature_string = "{:<12}".format("temperature") + temperature_str
+
+                    print("=" * len(names_string))
+                    print(names_string)
+                    print(util_string)
+                    print(temperature_string)
+                    print("=" * len(names_string))
 
     def create_info_string(self, data):
         string = ""
         for val in data:
             string += "|{:^8}".format(val)
-            string += "|"
+        string += "|"
         return string
 
     def clear_devices_data(self):
@@ -439,8 +453,13 @@ class RamListener():
     def info(self):
         if len(self.available):
             print("RAM INFO:")
-            print("\ttotal: {}".format(self.total))
-            print("\tavailable: {}".format(self.available[-1]))
-            print("\tused: {}".format(self.used[-1]))
-            print("\tpercents: {}".format(self.percents[-1]))
-            print("\ttime: {}".format(self.time[-1]))
+            print("time: {}".format(self.time[-1]))
+            info_string = "|total: {} | available: {} | used: {} | percents: {} |".format(self.total,
+                                                                                          self.available[-1],
+                                                                                          self.used[-1],
+                                                                                          self.percents[-1])
+            print("="*len(info_string))
+            print(info_string)
+            print("="*len(info_string))
+
+
