@@ -52,7 +52,7 @@ if __name__ == "__main__":
         os.mkdir("logs")
 
     devices = ["CPU"]
-    save_every_minutes = 1
+    save_every_minutes = 0.3
 
     now = datetime.now().strftime("%d-%m-%Y|%H:%M:%S")
     current_logs_dir = os.path.join("logs", now)
