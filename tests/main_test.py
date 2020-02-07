@@ -4,7 +4,7 @@ import getpass
 from openvino.inference_engine import IENetwork, IEPlugin
 
 from src.Stats import *
-from src.Threads import ListenersThreads, InferExecutorThread
+from src.Threads import ListenersThread, InferExecutorThread
 from src.InferExecutor import InferExecutor
 
 user_name = getpass.getuser()
@@ -58,7 +58,7 @@ def build_listeners(devices):
 
 
 listeners_list = build_listeners(devices)
-listeners_threads = ListenersThreads(listeners_list)
+listeners_threads = ListenersThread(listeners_list)
 
 listeners_threads.start()
 

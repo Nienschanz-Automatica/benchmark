@@ -1,42 +1,14 @@
 import os
 import cv2
 import getpass
+from sys import exit
 from datetime import datetime
+from signal import signal, SIGINT
 from openvino.inference_engine import IENetwork, IEPlugin
 
 from src.Stats import *
-from src.Threads import ListenersThreads, InferExecutorThread
+from src.Threads import ListenersThread, InferExecutorThread
 from src.InferExecutor import InferExecutor
-
-
-if "logs" not in os.listdir(os.getcwd()):
-    os.mkdir("logs")
-
-devices = ["HDDL", "CPU"]
-save_every_minutes = 1
-
-now = datetime.now().strftime("%d-%m-%Y|%H:%M:%S")
-current_logs_dir = os.path.join("logs", now)
-os.mkdir(current_logs_dir)
-for device in devices:
-    os.mkdir(os.path.join(current_logs_dir, device))
-os.mkdir(os.path.join(current_logs_dir, "RAM"))
-
-
-
-if "CPU" in devices:
-    user_name = getpass.getuser()
-    cpu_extention_dir = "/home/{}/inference_engine_samples_build/intel64/Release/lib/".format(user_name)
-    cpu_extention_filename = "libcpu_extension.so"
-    path_to_cpu_extention = os.path.join(cpu_extention_dir, cpu_extention_filename)
-else:
-    path_to_cpu_extention = None
-
-request_num = 32
-
-xml_file = "model/road-segmentation-adas-0001.xml"
-bin_file = "model/road-segmentation-adas-0001.bin"
-
 
 def build_executors(xml_file, bin_file, devices, requests_num):
     threads_list = []
@@ -76,11 +48,50 @@ def build_listeners(devices):
     return listeners
 
 
-listeners_list = build_listeners(devices)
-listeners_threads = ListenersThreads(listeners_list)
+if __name__ == "__main__":
+    if "logs" not in os.listdir(os.getcwd()):
+        os.mkdir("logs")
 
-listeners_threads.start()
+    devices = ["CPU"]
+    save_every_minutes = 1
 
-executors_threads_list = build_executors(xml_file, bin_file, devices, request_num)
-for executor_thread in executors_threads_list:
-    executor_thread.start()
+    now = datetime.now().strftime("%d-%m-%Y|%H:%M:%S")
+    current_logs_dir = os.path.join("logs", now)
+    os.mkdir(current_logs_dir)
+    for device in devices:
+        os.mkdir(os.path.join(current_logs_dir, device))
+    os.mkdir(os.path.join(current_logs_dir, "RAM"))
+
+    if "CPU" in devices:
+        user_name = getpass.getuser()
+        cpu_extention_dir = "/home/{}/inference_engine_samples_build/intel64/Release/lib/".format(user_name)
+        cpu_extention_filename = "libcpu_extension.so"
+        path_to_cpu_extention = os.path.join(cpu_extention_dir, cpu_extention_filename)
+    else:
+        path_to_cpu_extention = None
+
+    request_num = 32
+
+    xml_file = "model/road-segmentation-adas-0001.xml"
+    bin_file = "model/road-segmentation-adas-0001.bin"
+
+    listeners_list = build_listeners(devices)
+    listeners_thread = ListenersThread(listeners_list)
+
+    listeners_thread.start()
+
+    executors_threads_list = build_executors(xml_file, bin_file, devices, request_num)
+    for executor_thread in executors_threads_list:
+        executor_thread.start()
+
+    def handler(signal_received, frame):
+        print("\nWhait untill becnchmark is stopping!")
+        listeners_thread.stop()
+        listeners_thread.join()
+        for executor_thread in executors_threads_list:
+            executor_thread.stop()
+            executor_thread.join()
+            executor_thread.del_executor()
+        exit(0)
+
+    signal(SIGINT, handler)
