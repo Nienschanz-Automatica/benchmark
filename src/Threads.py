@@ -37,10 +37,10 @@ class ListenersThreads(Thread):
                 for listener in self.listeners:
                     listener.update(now)
                     listener.info()
-                print("\n"*2)
+                print("\n")
         else:
             for listener in self.listeners:
                 listener.update(now)
                 listener.info()
-            print("\n"*2)
+            print("\n")
             sleep(5)

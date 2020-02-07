@@ -21,16 +21,9 @@ class CpuStatsListener():
         else:
             return False
 
-    def old_info(self):
-        if len(self.devices):
-            print("CPU INFO:")
-        for device in self.devices:
-            device.info()
-
     def info(self):
         if len(self.devices):
             if len(self.devices[0].time):
-                print("=" * 8 * len(self.devices))
                 print("CPU INFO:")
                 if len(self.devices[0].time):
                     print("time: {}".format(self.devices[0].time[-1]))
@@ -55,7 +48,7 @@ class CpuStatsListener():
         string = ""
         for val in data:
             string += "|{:^8}".format(val)
-            string += "|"
+        string += "|"
         return string
 
     def clear_devices_data(self):
@@ -155,16 +148,9 @@ class HDDLStatsListener():
         else:
             return False
 
-    def old_info(self):
-        if len(self.devices):
-            print("HDDL INFO:")
-            for device in self.devices:
-                device.info()
-
     def info(self):
         if len(self.devices):
             if len(self.devices[0].time):
-                print("=" * 8 * len(self.devices))
                 print("HDDL INFO:")
                 if len(self.devices[0].time):
                     print("time: {}".format(self.devices[0].time[-1]))
@@ -426,7 +412,6 @@ class RamListener():
             size = size / 1024.0  # apply the division
         size = round(size, precision)
         return "{} {}".format(size, suffixes[suffixIndex])
-
 
     def clear_data(self):
         self.available = []
