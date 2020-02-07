@@ -344,15 +344,24 @@ class RamListener():
 
     def update(self, time):
         memory_data = psutil.virtual_memory()
-        self.total.append(memory_data.total)
-        self.available.append(memory_data.available)
-        self.used.append(memory_data.used)
-        self.percents.append(memory_data.percent)
-        self.time.append(time)
+        self.update_total(memory_data.total)
+        self.update_available(memory_data.available)
+        self.update_used(memory_data.used)
+        self.update_percents(memory_data.percent)
+        self.update_time(time)
         if self.ready_to_save():
             ram_data = self.get_statistic()
             self.save_statistic(ram_data)
             self.clear_data()
+
+    def bytes_to_readable(self, size_in_bytes, precision=2):
+        suffixes = ['B', 'KB', 'MB', 'GB', 'TB']
+        suffixIndex = 0
+        while size_in_bytes > 1024 and suffixIndex < 4:
+            suffixIndex += 1  # increment the index of the suffix
+        size = size_in_bytes / 1024.0  # apply the division
+        return "%.*f%s" % (precision, size, suffixes[suffixIndex])
+
 
     def clear_data(self):
         self.available = []
@@ -365,20 +374,20 @@ class RamListener():
 
     def update_total(self, value):
         if self.total is None:
-            self.total = value
+            self.total = self.bytes_to_readable(value)
 
     def update_available(self, val):
-        self.available.append(val)
+        self.available.append(self.bytes_to_readable(val))
 
     def update_used(self, val):
-        self.used.append(val)
+        self.used.append(self.bytes_to_readable(val))
 
     def update_percents(self, val):
         self.percents.append(val)
 
     def info(self):
         print("RAM INFO:")
-        print("\ttotal: {}".format(self.total[-1]))
+        print("\ttotal: {}".format(self.total))
         print("\tavailable: {}".format(self.available[-1]))
         print("\tused: {}".format(self.used[-1]))
         print("\tpercents: {}".format(self.percents[-1]))
