@@ -44,7 +44,7 @@ def build_executors(xml_file, bin_file, devices):
             config = {"CPU_THREADS_NUM": "0", "CPU_THROUGHPUT_STREAMS": str(requests_num)}
             plugin.add_cpu_extension(path_to_cpu_extention)
         elif device == "MYRIAD":
-            plugin = IEPlugin(device)
+            plugin = IEPlugin("HDDL")
             config = {"LOG_LEVEL": "LOG_INFO",
                       "VPU_LOG_LEVEL": "LOG_INFO"}
             requests_num = benchmark_config["myriad_request_num"]

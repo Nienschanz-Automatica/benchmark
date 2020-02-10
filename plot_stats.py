@@ -18,7 +18,7 @@ for dir in os.listdir(logs_dir):
         cpu_plotter.save_figure(cpu_utilisation_fig, "cpu_util.png")
         cpu_plotter.save_figure(cpu_temperature_fig, "cpu_temp.png")
 
-    elif dir == "HDDL":
+    elif dir == "MYRIAD":
         hddl_file = [file for file in os.listdir(os.path.join(logs_dir, dir)) if file[-4:] == ".csv"][0]
         hddl_file = os.path.join(logs_dir, dir, hddl_file)
 
