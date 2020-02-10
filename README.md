@@ -1,6 +1,11 @@
 ### Нагрузочный тест для CPU и MYRIAD устройств.  
 
 #### Подготовка  
+Выполните установку [OpenVino toolskit](https://docs.openvinotoolkit.org). ([Installation guide](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux.html))
+Для тестирования устройств MYRIAD:
+* [руководство по конфигурации](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)  
+* [руководство по конфигурации hddldaemon](https://www.google.ru/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&ved=2ahUKEwjK1veQ18bnAhUKEJoKHUAZDbcQFjAEegQIAxAB&url=https%3A%2F%2Fdls.ieiworld.com%2FIEIWEB%2FMARKETING_MATERIAL%2Fmustang%2Finitial_daemon_for_utilization_and_temperture_monitoring.pdf&usg=AOvVaw2BXkf228JHa2_WkdqhSdGc)
+
 Выполните следующие команды:  
 1. `cd [путь_к_папке_бенчмарка]/tools`  
 2. `sh ./download_model.sh`  - выполняет скачивание файлов модели нейронной сети  
@@ -16,8 +21,8 @@
 |`running_time`             | время работы теста (указывается в **минутах**). При значении "-1" время работы бесконечно. |
 |`path_to_cpu_extention`    | путь к файлу **libcpu_extension.so** (необходим для работы CPU плагина).                   |
 |`path_to_hddl_daemon`      | путь к исполняемому файлу **hddldaemon** (необходим для сбора статистики устройств MYRIAD).| 
-|`model_bin_name`           | назавние bin файла модели, на которой будет производиться инференс.                        |
-|`model_xml_name`           | назавние xml файла модели, на которой будет производиться инференс.                        |
+|`model_bin_name`           | название bin файла модели, на которой будет производиться инференс.                        |
+|`model_xml_name`           | название xml файла модели, на которой будет производиться инференс.                        |
 |`cpu_request_num`          | количество асинхронных запросов для CPU.                                                   |
 |`myriad_request_num`       | количество асинхронных запросов для Myriad.                                                |
 
