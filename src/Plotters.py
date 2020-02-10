@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from numpy import max as npmax
 from matplotlib import pyplot as plt
@@ -5,6 +6,8 @@ from matplotlib import pyplot as plt
 
 class DevicesDataPlotter():
     def __init__(self, path_to_csv_file):
+        dirs = [dir for dir in path_to_csv_file.split("/")]
+        self.dir_to_save ="/".join(dirs[:-1])
         self.data = pd.read_csv(path_to_csv_file)
         self.devices_names = []
         self.utils_data = []
@@ -59,11 +62,14 @@ class DevicesDataPlotter():
         return fig
 
     def save_figure(self, figure, file_name):
-        figure.savefig(file_name, dpi=200)
+        path_to_save = os.path.join(self.dir_to_save, file_name)
+        figure.savefig(path_to_save, dpi=200)
 
 
 class RAMPlotter():
     def __init__(self, path_to_csv_file):
+        dirs = [dir for dir in path_to_csv_file.split("/")]
+        self.dir_to_save ="/".join(dirs[:-1])
         self.data = pd.read_csv(path_to_csv_file)
         self.utils_data = []
         self.time = []
@@ -96,4 +102,5 @@ class RAMPlotter():
         return fig
 
     def save_figure(self, figure, file_name):
-        figure.savefig(file_name, dpi=200)
+        path_to_save = os.path.join(self.dir_to_save, file_name)
+        figure.savefig(path_to_save, dpi=200)

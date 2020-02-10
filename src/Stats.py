@@ -132,9 +132,9 @@ class CpuStatsListener(Listener):
 class HddlStatsListener(Listener):
     def __init__(self, path_to_hddldaemon, log_dir, save_every_minutes):
         Listener.__init__(self, save_every_minutes)
-        self.log_file_name = os.path.join(log_dir, "HDDL", "hddl.csv")
+        self.log_file_name = os.path.join(log_dir, "MYRIAD", "myriad.csv")
         self.running = False
-        start_daemon_command = os.path.join(path_to_hddldaemon, "hddldaemon")
+        start_daemon_command = os.path.join(path_to_hddldaemon)
         print("Please wait. Loading may take a few minutes.")
         self.daemon = self.init_daemon(start_daemon_command)
         self.wait_for_loading()
@@ -145,7 +145,7 @@ class HddlStatsListener(Listener):
     def info(self):
         if len(self.devices):
             if len(self.devices[0].time):
-                print("HDDL INFO:")
+                print("MYRIAD INFO:")
                 print("time: {}".format(self.devices[0].time[-1]))
                 names = [device.name for device in self.devices]
                 usage = [device.util[-1] for device in self.devices if len(device.util)]
