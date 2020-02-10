@@ -2,6 +2,7 @@
 
 #### Подготовка  
 Выполните установку [OpenVino toolskit](https://docs.openvinotoolkit.org). ([Installation guide](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux.html))  
+  
 Для тестирования устройств MYRIAD:
 * [руководство по конфигурации](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)  
 * [руководство по конфигурации hddldaemon](https://www.google.ru/url?sa=t&rct=j&q=&esrc=s&source=web&cd=5&ved=2ahUKEwjK1veQ18bnAhUKEJoKHUAZDbcQFjAEegQIAxAB&url=https%3A%2F%2Fdls.ieiworld.com%2FIEIWEB%2FMARKETING_MATERIAL%2Fmustang%2Finitial_daemon_for_utilization_and_temperture_monitoring.pdf&usg=AOvVaw2BXkf228JHa2_WkdqhSdGc)
@@ -26,8 +27,7 @@
 |`cpu_request_num`          | количество асинхронных запросов для CPU.                                                   |
 |`myriad_request_num`       | количество асинхронных запросов для Myriad.                                                |
 
-В процессе работы бенчмарка статистические данные о работе устройств будут сохраняться в подкаталоге папки **logs**.  
-Имя подкаталога соответсвует дате и времени начала работы бенчмарка.  
+В процессе работы бенчмарка статистические данные о работе устройств будут сохраняться в подкаталоге папки **logs**. Имя подкаталога соответсвует дате и времени начала работы бенчмарка.  
 
 #### Запуск теста  
 Для запуска теста выполните команду `python3 run_benchmark.py`
