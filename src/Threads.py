@@ -20,7 +20,7 @@ class InferExecutorThread(Thread):
 
     def run(self):
         while True:
-            if self.running_time != "inf":
+            if self.running_time > 0:
                 if self.running_time < (time() - self.start_time)/60:
                     return
             if self.stopped():
@@ -41,6 +41,7 @@ class ListenersThread(Thread):
         self.hddl_listener = None
         self._stopper = Event()
         self.start_time = time()
+
         self.running_time = running_time
         for idx, listener in enumerate(self.listeners):
             if isinstance(listener, HddlStatsListener):
@@ -48,7 +49,7 @@ class ListenersThread(Thread):
 
     def run(self):
         while True:
-            if self.running_time != "inf":
+            if self.running_time > 0:
                 if self.running_time < (time() - self.start_time)/60:
                     return
             if self.stopped():
