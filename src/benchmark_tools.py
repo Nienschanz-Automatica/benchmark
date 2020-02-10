@@ -43,11 +43,11 @@ def build_executors(xml_file, bin_file, devices):
             requests_num = benchmark_config["cpu_request_num"]
             config = {"CPU_THREADS_NUM": "0", "CPU_THROUGHPUT_STREAMS": str(requests_num)}
             plugin.add_cpu_extension(path_to_cpu_extention)
-        elif device == "HDDL":
+        elif device == "MYRIAD":
             plugin = IEPlugin(device)
             config = {"LOG_LEVEL": "LOG_INFO",
                       "VPU_LOG_LEVEL": "LOG_INFO"}
-            requests_num = benchmark_config["hddl_request_num"]
+            requests_num = benchmark_config["myriad_request_num"]
         else:
             raise ValueError('Unidentified device "{}"!'.format(device))
             sys.exit(-1)
@@ -66,8 +66,8 @@ def build_listeners(devices):
     for device in devices:
         if device == "CPU":
             listeners.append(CpuStatsListener(current_logs_dir, save_logs_every_minutes))
-        elif device == "HDDL":
-            path_to_daemon = "/opt/intel/openvino/deployment_tools/inference_engine/external/hddl/bin/"
+        elif device == "MYRIAD":
+            path_to_daemon = benchmark_config["path_to_hddl_daemon"]
             listeners.append(HddlStatsListener(path_to_daemon, current_logs_dir, save_logs_every_minutes))
         else:
             raise ValueError('Unidentified device "{}"!'.format(device))
