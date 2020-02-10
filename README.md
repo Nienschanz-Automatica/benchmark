@@ -1,7 +1,7 @@
 ### Нагрузочный тест для CPU и MYRIAD устройств.  
 
 #### Подготовка  
-Выполните установку [OpenVino toolskit](https://docs.openvinotoolkit.org). ([Installation guide](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux.html))  
+Выполните установку [OpenVino toolkit](https://docs.openvinotoolkit.org). ([Installation guide](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux.html))  
   
 Для тестирования устройств MYRIAD:
 * [руководство по конфигурации](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_linux_ivad_vpu.html)  
@@ -15,9 +15,9 @@
 #### Параметры запуска:  
 Основные параметры тестирования прописываются в файле **benchmark.cfg**:  
 
-| Параметр                  | Описание                                                                                            |
+| Параметр                  | Описание                                                                                   |
 | ------------------------- |:-------------------------------------------------------------------------------------------| 
-|`devices`                  | список устройств (доступные обозначения: CPU, MYRIAD).                                      |
+|`devices`                  | список устройств (доступные обозначения: CPU, MYRIAD).                                     |
 |`save_logs_every_N_minutes`| период сохранения статистики в лог (указывается в **минутах**).                            |
 |`running_time`             | время работы теста (указывается в **минутах**). При значении "-1" время работы бесконечно. |
 |`path_to_cpu_extention`    | путь к файлу **libcpu_extension.so** (необходим для работы CPU плагина).                   |
