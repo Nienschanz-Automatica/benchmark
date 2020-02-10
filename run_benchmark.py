@@ -16,11 +16,10 @@ if __name__ == "__main__":
     os.mkdir(os.path.join(current_logs_dir, "RAM"))
 
     listeners_list = build_listeners(devices)
-    listeners_thread = ListenersThread(listeners_list)
-
+    listeners_thread = ListenersThread(listeners_list, running_time)
     listeners_thread.start()
 
-    executors_threads_list = build_executors(xml_file, bin_file, devices, request_num)
+    executors_threads_list = build_executors(xml_file, bin_file, devices)
     for executor_thread in executors_threads_list:
         executor_thread.start()
 
@@ -32,6 +31,6 @@ if __name__ == "__main__":
             executor_thread.stop()
             executor_thread.join()
             executor_thread.del_executor()
-        exit(0)
+        exit("Testing stopped by user")
 
     signal(SIGINT, handler)
