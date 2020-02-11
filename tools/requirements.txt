@@ -1,4 +1,5 @@
 psutil
+numpy
 pandas
 openpyxl
 xlrd
